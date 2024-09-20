@@ -13,6 +13,9 @@ Pull requests are welcome. Enjoy!
 5. [ View Queries. ](#view)
 6. [ Altering Table Queries.](#alter)
 7. [ Creating Table Query.](#create)
+8. [Advanced SQL Functions](#advanced)
+9. [Common SQL Patterns](#patterns)
+
 
 <a name="find"></a>
 # 1. Finding Data Queries
@@ -193,3 +196,69 @@ Pull requests are welcome. Enjoy!
    `column3` `datatype`, <br />
    `column4` `datatype`, <br />
    `);`
+
+
+
+<a name="advanced"></a>
+## 8. Advanced SQL Functions
+
+### **CASE Statement**: Adds conditional logic to queries.
+```sql
+SELECT CASE WHEN condition THEN result_1 ELSE result_2 END AS alias_column FROM your_table;
+-- Example:
+SELECT employee_id,
+       CASE WHEN salary > 50000 THEN 'High' ELSE 'Low' END AS salary_level 
+FROM employees;
+```
+
+### **COALESCE() Function**: Returns the first non-null value in the list.
+```sql
+SELECT COALESCE(column_1, 'default_value') AS result_column FROM your_table;
+-- Example:
+SELECT employee_id, COALESCE(bonus, 0) AS bonus_amount FROM employees;
+```
+
+### **STRING_AGG() Function (PostgreSQL)**: Concatenates values from multiple rows into one string.
+```sql
+SELECT STRING_AGG(column_value, ', ') AS concatenated_values FROM your_table GROUP BY grouping_column;
+-- Example:
+SELECT department_id, STRING_AGG(employee_id::text, ', ') AS employees_list FROM employees GROUP BY department_id;
+```
+---
+
+<a name="patterns"></a>
+## 9. Common SQL Patterns
+
+These patterns can help you solve frequent tasks in SQL.
+
+- ### Pagination:
+   ```sql
+   SELECT * FROM your_table ORDER BY id LIMIT page_size OFFSET (page_number - 1) * page_size;
+   ```
+
+- ### Find Duplicates:
+   ```sql
+   SELECT column_to_check, COUNT(*) as count 
+   FROM your_table GROUP BY column_to_check HAVING COUNT(*) > 1;
+   ```
+
+- ### Conditional Aggregation:
+   ```sql
+   SELECT department,
+          SUM(CASE WHEN gender = 'M' THEN salary ELSE 0 END) AS male_salary,
+          SUM(CASE WHEN gender = 'F' THEN salary ELSE 0 END) AS female_salary 
+   FROM employees GROUP BY department;
+   ```
+
+- ### Recursive Query for Hierarchical Data:
+   ```sql
+   WITH RECURSIVE hierarchy AS (
+       SELECT id, parent_id, name FROM categories WHERE parent_id IS NULL  -- Starting point for recursion  
+       UNION ALL  
+       SELECT c.id, c.parent_id, c.name  
+       FROM categories c  
+       INNER JOIN hierarchy h ON h.id = c.parent_id  
+   )  
+   SELECT * FROM hierarchy;
+   ```
+
